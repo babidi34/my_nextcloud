@@ -1,0 +1,72 @@
+---
+- name: deploy my nextcloud
+  hosts: prod
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - .ansible_vars.yml
+  vars:
+    certbot_create_if_missing: true
+    certbot_certs:
+      - email: contact@linux-man.fr
+        domains:
+          - "{{ domain_name }}"
+    docker_install_compose: true
+    deploy_docker_compose_directory: /opt/my_nextcloud
+    deploy_docker_compose_git_repo_url: git@gitlab.com:babidi34/my_nextcloud.git
+    deploy_docker_compose_git_repo_branch: master
+    deploy_docker_compose_git_ssh_key_content: "{{ ssh_key_gitlab }}"
+    deploy_docker_compose_git_ssh_key: /root/.ssh/id_gitlab_key
+    nginx_vhosts:
+      - listen: "80"
+        server_name: "{{ domain_name }}"
+        state: "present"
+        filename: "{{ domain_name }}.conf"
+        extra_parameters: |
+          if ($scheme = "http") {
+            return 301 https://$host$request_uri;
+          }
+      - listen: "443 ssl http2"
+        server_name: "{{ domain_name }}"
+        access_log: "/var/log/nginx/ssl-{{ domain_name }}.access.log"
+        error_log: "/var/log/nginx/ssl-{{ domain_name }}.error.log"
+        state: "present"
+        filename: "{{ domain_name }}.conf"
+        extra_parameters: |
+          location / {
+            proxy_pass http://127.0.0.1:11000$request_uri;
+
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Port $server_port;
+            proxy_set_header X-Forwarded-Scheme $scheme;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header Accept-Encoding "";
+            proxy_set_header Host $host;
+        
+            client_body_buffer_size 512k;
+            proxy_read_timeout 86400s;
+            client_max_body_size 0;
+
+            # Websocket
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+
+          }
+          ssl_certificate           {{ ssl_cert_path }};
+          ssl_certificate_key       {{ ssl_key_path }};
+          ssl_protocols             TLSv1.2 TLSv1.3;
+          ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+          ssl_prefer_server_ciphers on;
+          ssl_session_timeout 1d;
+          ssl_session_cache shared:MozSSL:10m; # about 40000 sessions
+          ssl_session_tickets       off;
+
+
+  roles:
+    - certbot
+    - manage-ssl-certs
+    - docker
+    - deploy-docker-compose
+    - nginx

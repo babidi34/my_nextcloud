@@ -1,3 +1,21 @@
 stages:
   - deploy
 
+deploy:
+  stage: deploy
+  image: registry.gitlab.com/babidi34/ansible:alpine-0.1 
+  before_script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "StrictHostKeyChecking no" > ~/.ssh/config
+    - chmod 644 ~/.ssh/config
+    - eval $(ssh-agent -s)
+    - cat $SSH_PRIVATE_KEY_GITLAB | tr -d '\r' | ssh-add -
+    - ansible-galaxy install -r $ANSIBLE_REQUIREMENTS
+    - cp $SSH_PRIVKEY_GITLAB_CI ~/.ssh/id_gitlabci
+    - chmod 600 ~/.ssh/id_gitlabci
+    - cp $ANSIBLE_VARS .ansible_vars.yml
+
+  script:
+    - ansible-playbook deploy_nextcloud.yml -i $ANSIBLE_INVENTORY -e ansible_user=gitlab-ci -e ansible_ssh_private_key_file=~/.ssh/id_gitlabci -D
+ 
