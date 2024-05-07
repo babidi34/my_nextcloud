@@ -3,7 +3,7 @@ stages:
 
 deploy:
   stage: deploy
-  image: registry.gitlab.com/babidi34/ansible:alpine-0.1 
+  image: registry.gitlab.com/babidi34/ansible:ansible-2.16.6
   before_script:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
