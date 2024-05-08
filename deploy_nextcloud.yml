@@ -32,7 +32,7 @@
         access_log: "/var/log/nginx/ssl-{{ domain_name }}.access.log"
         error_log: "/var/log/nginx/ssl-{{ domain_name }}.error.log"
         state: "present"
-        filename: "{{ domain_name }}.conf"
+        filename: "ssl-{{ domain_name }}.conf"
         extra_parameters: |
           location / {
             proxy_pass http://127.0.0.1:11000$request_uri;
