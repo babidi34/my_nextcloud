@@ -6,6 +6,7 @@
   vars_files:
     - .ansible_vars.yml
   vars:
+    certbot_create_extra_args: ""
     certbot_create_if_missing: true
     certbot_certs:
       - email: contact@linux-man.fr
