@@ -14,7 +14,7 @@ services:
       - APACHE_PORT=11000 
       - APACHE_IP_BINDING=127.0.0.1
       - SKIP_DOMAIN_VALIDATION=true
-      - NEXTCLOUD_ADDITIONAL_PHP_EXTENSIONS="imagemagick ghostscript"
+      - NEXTCLOUD_ADDITIONAL_PHP_EXTENSIONS=imagemagick ghostscript
       # BORG_RETENTION_POLICY: --keep-within=7d --keep-weekly=4 --keep-monthly=6 # Allows to adjust borgs retention policy. See https://github.com/nextcloud/all-in-one#how-to-adjust-borgs-retention-policy
       # COLLABORA_SECCOMP_DISABLED: false # Setting this to true allows to disable Collabora's Seccomp feature. See https://github.com/nextcloud/all-in-one#how-to-disable-collaboras-seccomp-feature
       # NEXTCLOUD_DATADIR: /mnt/ncdata # Allows to set the host directory for Nextcloud's datadir. ⚠️⚠️⚠️ Warning: do not set or adjust this value after the initial Nextcloud installation is done! See https://github.com/nextcloud/all-in-one#how-to-change-the-default-location-of-nextclouds-datadir
