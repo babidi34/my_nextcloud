@@ -64,6 +64,14 @@
           ssl_session_cache shared:MozSSL:10m; # about 40000 sessions
           ssl_session_tickets       off;
 
+    restic_ssh_enabled: false
+    restic_repository: "{{ restic_repo_nextcloud }}"
+    restic_aws_access_key_id: "{{ b2_lm_aws_access_key_id }}"
+    restic_aws_secret_access_key: "{{ b2_lm_aws_secret_access_key }}"
+    restic_default_folders: []
+    restic_folders:
+      - {path: "/mnt/nextcloud-backup/"}
+
 
   roles:
     - certbot
@@ -71,3 +79,4 @@
     - docker
     - deploy-docker-compose
     - nginx
+    - restic
