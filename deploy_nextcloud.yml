@@ -111,7 +111,6 @@
     restic_listen_port: 8001
     restic_refresh_interval: 60
 
-
   roles:
     - certbot
     - manage-ssl-certs
