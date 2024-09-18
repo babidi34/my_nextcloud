@@ -1,0 +1,31 @@
+---
+roles:
+
+  - name: certbot
+    src: https://github.com/geerlingguy/ansible-role-certbot
+    scm: git
+  - name: docker
+    src: https://github.com/geerlingguy/ansible-role-docker.git
+    scm: git
+  - name: manage-ssl-certs
+    src: git@gitlab.com:babidi34/ansible-role-manage-ssl-certs.git
+    scm: git
+  - name: nginx
+    src: https://github.com/geerlingguy/ansible-role-nginx.git
+    scm: git
+  - name: deploy-docker-compose
+    src: git@gitlab.com:babidi34/ansible-role-docker-compose.git
+    scm: git
+  - name: restic
+    src: git@github.com:babidi34/ansible-restic.git
+    scm: git
+  - name: restic-exporter
+    src: git@gitlab.com:babidi34/ansible-role-restic-exporter.git
+    scm: git
+
+collections:
+  - name: ansible.posix
+    version: 1.5.4
+  - name: community.general
+    version: 8.6.0
+  - name: ansible.netcommon

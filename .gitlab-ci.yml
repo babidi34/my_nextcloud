@@ -14,7 +14,6 @@ deploy:
     - cp $SSH_PRIVKEY_GITLAB_CI ~/.ssh/id_gitlabci
     - chmod 600 ~/.ssh/id_gitlabci
     - cp $ANSIBLE_VARS .ansible_vars.yml
-    - cp $ANSIBLE_REQUIREMENTS requirements.yml
     - ansible-galaxy install -r requirements.yml
   script:
     - ansible-playbook deploy_nextcloud.yml -i $ANSIBLE_INVENTORY -e ansible_user=gitlab-ci -e ansible_ssh_private_key_file=~/.ssh/id_gitlabci -D
