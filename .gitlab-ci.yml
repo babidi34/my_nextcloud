@@ -1,21 +1,25 @@
 stages:
   - deploy
 
+variables:
+  ANSIBLE_HOST_KEY_CHECKING: False
+  ANSIBLE_PRIVATE_KEY_FILE: /root/.ssh/private_key
+  GIT_SSH_COMMAND: "ssh -i /root/.ssh/gitlab_key -o StrictHostKeyChecking=no"
+
 deploy:
   stage: deploy
-  image: registry.gitlab.com/babidi34/ansible:ansible-2.16.6
+  image: registry.gitlab.com/babidi34/ansible:alpine3.18
+  cache:
+    paths:
+      - /root/.cache/pip
+      - /ansible-venv
   before_script:
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "StrictHostKeyChecking no" > ~/.ssh/config
-    - chmod 644 ~/.ssh/config
-    - eval $(ssh-agent -s)
-    - cat $SSH_PRIVATE_KEY_GITLAB | tr -d '\r' | ssh-add -
-    - cp $SSH_PRIVKEY_GITLAB_CI ~/.ssh/id_gitlabci
-    - chmod 600 ~/.ssh/id_gitlabci
-    - cp $ANSIBLE_VARS .ansible_vars.yml
+    - mkdir /root/.ssh
+    - echo "$SSH_PRIVKEY_GITLAB_CI" | tr -d '\r' > /root/.ssh/private_key
+    - echo "$SSH_PRIVATE_KEY_GITLAB" | tr -d '\r' > /root/.ssh/gitlab_key # use by ansible-galaxy
+    - chmod -R 600 /root/.ssh
     - ansible-galaxy install -r requirements.yml
   script:
-    - ansible-playbook deploy_nextcloud.yml -i $ANSIBLE_INVENTORY -e ansible_user=gitlab-ci -e ansible_ssh_private_key_file=~/.ssh/id_gitlabci -D
+    - ansible-playbook deploy_nextcloud.yml -e "@$SECRETS_VARS"  -D
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_REF_NAME == "master"

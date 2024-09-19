@@ -17,7 +17,7 @@ roles:
     src: git@gitlab.com:babidi34/ansible-role-docker-compose.git
     scm: git
   - name: restic
-    src: git@github.com:babidi34/ansible-restic.git
+    src: https://github.com/babidi34/ansible-restic.git
     scm: git
   - name: restic-exporter
     src: git@gitlab.com:babidi34/ansible-role-restic-exporter.git

@@ -1,11 +1,10 @@
 ---
-- name: deploy my nextcloud
+- name: Deploy my nextcloud
   hosts: prod
-  gather_facts: yes
-  become: yes
-  vars_files:
-    - .ansible_vars.yml
+  gather_facts: true
+  become: true
   vars:
+    domain_name: "{{ lookup('env', 'DOMAIN_NAME') }}"
     certbot_create_extra_args: ""
     certbot_create_if_missing: true
     certbot_certs:
@@ -14,10 +13,8 @@
           - "{{ domain_name }}"
     docker_install_compose: true
     deploy_docker_compose_directory: /opt/my_nextcloud
-    deploy_docker_compose_git_repo_url: git@gitlab.com:babidi34/my_nextcloud.git
-    deploy_docker_compose_git_repo_branch: master
-    deploy_docker_compose_git_ssh_key_content: "{{ ssh_key_gitlab }}"
-    deploy_docker_compose_git_ssh_key: /root/.ssh/id_gitlab_key
+    deploy_docker_compose_git_repo_url: "{{ lookup('env', 'CI_REPOSITORY_URL') }}"
+    deploy_docker_compose_git_repo_branch: "{{ lookup('env', 'CI_COMMIT_REF_NAME') }}"
     nginx_vhosts:
       - listen: "80"
         server_name: "{{ domain_name }}"
@@ -44,7 +41,7 @@
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header Accept-Encoding "";
             proxy_set_header Host $host;
-        
+
             client_body_buffer_size 512k;
             proxy_read_timeout 86400s;
             client_max_body_size 0;
@@ -64,11 +61,11 @@
           ssl_session_cache shared:MozSSL:10m; # about 40000 sessions
           ssl_session_tickets       off;
       - listen: "9443 ssl http2"
-        server_name: "{{ domain_name }}"
-        access_log: "/var/log/nginx/ssl-{{ domain_name }}.access.log"
-        error_log: "/var/log/nginx/ssl-{{ domain_name }}.error.log"
+        server_name: "localhost"
+        access_log: "/var/log/nginx/restic-exporter.access.log"
+        error_log: "/var/log/nginx/restic-exporter.error.log"
         state: "present"
-        filename: "{{ domain_name }}.conf"
+        filename: "restic-exporter.conf"
         extra_parameters: |
           location / {
               proxy_pass http://{{ restic_listen_address }}:{{ restic_listen_port }};
@@ -81,8 +78,7 @@
 
               # Autoriser certaines IPs spécifiques
               allow 2a01:e0a:ddf:760::/64; #ipv6 Home
-              allow 82.67.38.92;
-              allow 192.168.56.0/24;
+              allow 82.67.38.92; # Home
               allow 10.0.0.2;
               deny all;              # Bloquer tous les autres
           }
